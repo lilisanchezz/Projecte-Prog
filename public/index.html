@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Placas</title>
+</head>
+<body>
+
+    <form action="/api/placas" method="post" id="createPlaca">
+        <input type="text" name="name" required />
+        <input type="file" name="file" required />
+        <button type="submit">create</button>
+    </form>
+    <ul id="container"></ul>
+
+    <template id="placa-template">
+        <li class="placa">
+            <span class="name"></span>
+            <button class="btn-txt">txt</button>
+            <button>csv top</button>
+            <button>csv bot</button>
+            <button>asq</button>
+            <button class="btn-more">More</button>
+            <button class="btn-del">Delete</button>
+            <ul class="components" hidden></ul>
+        </li>
+    </template>
+    <script>
+        /**
+         * @type {HTMLFormElement}
+         * */
+        const form = document.getElementById('createPlaca');
+        form.addEventListener('submit', event => {
+            event.preventDefault();
+
+            const data = new FormData(form);
+            const fileInput = form.querySelector('input[type="file"]');
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            reader.readAsText(file, 'UTF-8');
+            reader.addEventListener('load', async e => {
+                const body = new URLSearchParams({
+                    name: data.get('name'),
+                    file: e.target.result
+                }).toString();
+                console.log(body);
+                const res = await fetch('/api/placas', {
+                    method: 'POST',
+                    body: body,
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    }
+                });
+                if(res.status === 204) {
+                    window.location.reload();
+                }
+            });
+        });
+        (async() => {
+            const template = document.getElementById('placa-template');
+            const container = document.getElementById('container');
+            const res = await fetch('/api/placas');
+            const data = await res.json();
+
+            for(const placa of data) {
+                const id = placa.id;
+                const clone = template.content.cloneNode(true).querySelector('.placa');
+                clone.dataset.id = id;
+                const name = clone.querySelector(".name");
+                name.textContent = placa.name;
+                /**
+                 * @type {HTMLUListElement}
+                 */
+                const components = clone.querySelector(".components");
+                for(const component of placa.components) {
+                    const li = document.createElement('li');
+                    li.textContent = 
+                        `id: ${component.id}, type: ${component.type}, outline: ${component.outline}, ` +
+                        `x: ${component.x}, y: ${component.y}, rotation: ${component.rotation}, flip: ${component.flip}`;
+
+                    components.appendChild(li);
+                }
+
+                const more = clone.querySelector('.btn-more');
+                more.addEventListener('click', () => components.hidden = !components.hidden);
+                const del = clone.querySelector('.btn-del');
+                del.addEventListener('click', async () => {
+                    const res = await fetch(`/api/placas/${id}`, {
+                        method: 'DELETE'
+                    });
+                    if(res.status === 204) {
+                        clone.remove();
+                    }
+                });
+                const txt = clone.querySelector('.btn-txt');
+                txt.addEventListener('click', async () => {
+                    const res = await fetch(`/api/placas/${id}/txt`);
+                    const fdata = await res.text();
+
+                    console.log(fdata);
+                })
+
+                container.appendChild(clone);
+            }
+        })()
+    </script>
+</body>
+</html>
