@@ -159,7 +159,6 @@ const endline = '\r\n';
  */
 exports.toTxt = json => {
   const components = Component.fromJson(json);
-  console.log(components, json)
   let fitxer = '';
   fitxer = '.PARTS' + endline;
   function space(num, txt) {
@@ -183,36 +182,42 @@ exports.toTxt = json => {
   fitxer += '.ENDPARTS' + endline;
   return fitxer;
 }
-// /**
-//  * @param {Component[]} components 
-//  */
-// function toASQ(components) {
-//   let file = '';
-//   for(const component of components) {
-//     let line = '';
-//     line += `#${component.part}#,`;
-//     line += `${component.x}, `;
-//     line += `${component.y}, `;
-//     line += `${component.rotation},#PYX#,##,`;
-//     line += `#${component.type} ${component.outline} #,1,T,#1#,0,F,#TAPE#,#X#,#A#,##,##,F`;
-//     line += endline;//falta flip
-//     file += line;
-//   }
-//   file += endline
-//   return file;
-// }
-// /**
-//  * @param {Component[]} components 
-//  */
-// function toCSV(components){
-//   let file = '';
-//   for(const component of components){
-//     let line = '';
-//     line += `${component.part},`;
-//     line += `1/2,1,`;
-//     line += `${component.x},`,
-//     line += `${component.y},`,
-//     line += `${component.rotation},0,100,不用,TRUE,`,
-//     line += `${component.type} ${component.outline}`
-//   }
-// }
+/**
+ * @param {object[]} components 
+ */
+exports.toASQ = json => {
+  const components = Component.fromJson(json);
+  let file = '';
+  for(const component of components) {
+    let line = '';
+    line += `#${component.id}#,`;
+    line += `${component.x}, `;
+    line += `${component.y}, `;
+    line += `${component.rotation},#PYX#,##,`;
+    line += `#${component.type} ${component.outline} #,1,T,#1#,0,F,#TAPE#,#X#,#A#,##,##,F`;
+    line += endline;//falta flip
+    file += line;
+  }
+  file += endline
+  return file;
+}
+/**
+ * @param {object[]} components 
+ */
+exports.toCSV = json => {
+  const components = Component.fromJson(json);
+  let file = '';
+  for(const component of components){
+    let line = '';
+    line += `${component.id},`;
+    line += `1/2,1,`;
+    line += `${component.x},`;
+    line += `${component.y},`;
+    line += `${component.rotation},0,100,不用,TRUE,`;
+    line += `${component.type} ${component.outline}`;
+    line += endline;
+    file += line;
+  }
+  file+= endline;
+  return file;
+}

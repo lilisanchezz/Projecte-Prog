@@ -70,10 +70,10 @@ module.exports = async db => {
                 res.send(components.toTxt(data.components));
                 break;
             case 'asq':
+                res.send(components.toASQ(data.components));
                 break;
-            case  'csv top':
-                break;
-            case  'csv bot':
+            case  'csv':
+                res.send(components.toCSV(data.components));
                 break;
         }
     })

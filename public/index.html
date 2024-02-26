@@ -3,30 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles2.css">
+    <link rel="icon" type="image/x-icon" href="placa-icon.png">
     <title>Placas</title>
 </head>
 <body>
 
-    <form action="/api/placas" method="post" id="createPlaca">
-        <input type="text" name="name" required />
-        <input type="file" name="file" required />
-        <button type="submit">create</button>
-    </form>
-    <ul id="container"></ul>
-
+    <div class="wrapper">
+        <div class="form-wrapper">
+            <form action="/api/placas" method="post" id="createPlaca">
+                <input class="texto" type="text" name="name" required placeholder="Ingrese Nombre..." />
+                <input class="archivo"type="file" name="file" required />
+                <button class="crear"type="submit">Crear</button>
+            </form>
+        </div>
+        
+        <ul id="container"></ul>
+    </div>
+    
+    
     <template id="placa-template">
         <li class="placa">
             <span class="name"></span>
-            <button class="btn-txt">txt</button>
-            <button>csv top</button>
-            <button>csv bot</button>
-            <button>asq</button>
-            <button class="btn-more">More</button>
-            <button class="btn-del">Delete</button>
+            <div class="placa-buttons">
+                <button class="btn-txt">txt</button>
+                <button class="btn-csv">csv</button>
+                <button class="btn-asq">asq</button>
+                <button class="btn-more">More</button>
+                <button class="btn-del">Delete</button>
+            </div>
             <ul class="components" hidden></ul>
         </li>
     </template>
     <script>
+        function download(filename, text) {
+            const element = document.createElement('a');
+            element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+            element.setAttribute('download', filename);
+
+            element.style.display = 'none';
+            document.body.appendChild(element);
+
+            element.click();
+
+            document.body.removeChild(element);
+        }
         /**
          * @type {HTMLFormElement}
          * */
@@ -98,7 +119,21 @@
                     const res = await fetch(`/api/placas/${id}/txt`);
                     const fdata = await res.text();
 
-                    console.log(fdata);
+                    download(`${placa.name}.txt`, fdata);
+                })
+                const asq = clone.querySelector('.btn-asq');
+                asq.addEventListener('click', async () => {
+                    const res = await fetch(`/api/placas/${id}/asq`);
+                    const fdata = await res.text();
+                    
+                    download(`${placa.name}.asq`, fdata);
+                })
+                const csv = clone.querySelector('.btn-csv');
+                csv.addEventListener('click', async () => {
+                    const res = await fetch(`/api/placas/${id}/csv`);
+                    const fdata = await res.text();
+                    
+                    download(`${placa.name}.csv`, fdata);
                 })
 
                 container.appendChild(clone);
